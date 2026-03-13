@@ -840,43 +840,28 @@ Return ONLY a valid raw JSON array, no markdown, no backticks, no explanation:
 [{"title":"...","department":"...","location":"...","type":"...","deadline":"...","url":"..."}]
 If no biology jobs found, return exactly: []`;
 
-  const TARGET = 'https://api.anthropic.com/v1/messages';
-  const PROXIES = [
-    `https://corsproxy.io/?url=${encodeURIComponent(TARGET)}`,
-    `https://api.allorigins.win/raw?url=${encodeURIComponent(TARGET)}`,
-  ];
-
-  const body = JSON.stringify({
-    model: 'claude-sonnet-4-20250514',
-    max_tokens: 2000,
-    tools: [{ name: 'web_search', type: 'web_search_20250305' }],
-    messages: [{ role: 'user', content: prompt }]
+  const resp = await fetch('https://anthropic-proxy.raouloliviermartin.workers.dev/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      tools: [{ name: 'web_search', type: 'web_search_20250305' }],
+      messages: [{ role: 'user', content: prompt }]
+    })
   });
 
-  let lastError;
-  for (const proxyUrl of PROXIES) {
-    try {
-      const resp = await fetch(proxyUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-        },
-        body
-      });
-      if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-      const data = await resp.json();
-      if (data.error) throw new Error(data.error.message || 'API error');
-      const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
-      const match = text.match(/\[[\s\S]*\]/);
-      if (!match) return [];
-      try { return JSON.parse(match[0]); } catch { return []; }
-    } catch(e) {
-      lastError = e;
-    }
-  }
-  throw lastError;
+  if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message || 'API error');
+  const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+  const match = text.match(/\[[\s\S]*\]/);
+  if (!match) return [];
+  try { return JSON.parse(match[0]); } catch { return []; }
 }
 
 async function checkSite(siteId) {
