@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🧬 Biology Faculty Job Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,300;0,400;0,600;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F7F5F0;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE8;
+    --border: #E2DDD6;
+    --text: #1A1714;
+    --text2: #6B6560;
+    --text3: #A09B96;
+    --green: #2D6A4F;
+    --green-light: #52B788;
+    --green-bg: #D8F3DC;
+    --green-border: #B7E4C7;
+    --amber: #B45309;
+    --amber-bg: #FEF3C7;
+    --red: #DC2626;
+    --red-bg: #FEE2E2;
+    --new-bg: #ECFDF5;
+    --new-border: #6EE7B7;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+    --shadow-lg: 0 4px 24px rgba(0,0,0,0.1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    box-shadow: 0 1px 0 var(--border);
+  }
+  .header-inner {
+    max-width: 960px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+    gap: 16px;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-icon {
+    width: 36px; height: 36px;
+    background: var(--green);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .logo-text {
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .logo-sub {
+    font-size: 12px;
+    color: var(--text3);
+    margin-top: -2px;
+  }
+  .header-actions { display: flex; gap: 8px; align-items: center; }
+
+  /* ── BUTTONS ── */
+  .btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 16px; border-radius: 8px;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap;
+  }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .btn-primary { background: var(--green); color: white; }
+  .btn-primary:hover:not(:disabled) { background: #245a42; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+  .btn-secondary:hover:not(:disabled) { background: var(--border); }
+  .btn-outline { background: transparent; color: var(--green); border: 1px solid var(--green-border); }
+  .btn-outline:hover:not(:disabled) { background: var(--green-bg); }
+  .btn-sm { padding: 5px 12px; font-size: 12px; border-radius: 6px; }
+  .btn-danger { background: var(--red-bg); color: var(--red); border: 1px solid #FECACA; }
+  .btn-danger:hover:not(:disabled) { background: #FEE2E2; }
+  .btn-check { background: var(--green); color: white; padding: 6px 14px; font-size: 12px; border-radius: 6px; }
+  .btn-check:hover:not(:disabled) { background: #245a42; }
+  .btn-check.loading { background: var(--surface2); color: var(--text2); }
+
+  /* ── MAIN LAYOUT ── */
+  .main { max-width: 960px; margin: 0 auto; padding: 28px 32px; }
+
+  /* ── SETUP BANNER ── */
+  .setup-banner {
+    background: linear-gradient(135deg, #F0FDF4, #DCFCE7);
+    border: 1px solid var(--green-border);
+    border-radius: 12px;
+    padding: 20px 24px;
+    margin-bottom: 24px;
+    display: flex; align-items: flex-start; gap: 16px;
+  }
+  .setup-banner.hidden { display: none; }
+  .setup-icon { font-size: 28px; flex-shrink: 0; margin-top: 2px; }
+  .setup-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; margin-bottom: 4px; color: var(--green); }
+  .setup-text { font-size: 13px; color: #374151; margin-bottom: 12px; line-height: 1.6; }
+  .setup-row { display: flex; gap: 8px; }
+  .setup-input {
+    flex: 1; padding: 9px 14px; border: 1px solid var(--green-border);
+    border-radius: 8px; font-size: 13px; font-family: 'DM Sans', sans-serif;
+    background: white; color: var(--text); outline: none;
+  }
+  .setup-input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(82,183,136,0.15); }
+
+  /* ── STATS BAR ── */
+  .stats-bar {
+    display: flex; gap: 20px; align-items: center;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; padding: 12px 20px; margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .stat { display: flex; flex-direction: column; }
+  .stat-val { font-family: 'Fraunces', serif; font-size: 22px; font-weight: 600; line-height: 1; color: var(--text); }
+  .stat-val.green { color: var(--green); }
+  .stat-label { font-size: 11px; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; margin-top: 2px; }
+  .stat-divider { width: 1px; height: 32px; background: var(--border); }
+
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex; gap: 8px; flex-wrap: wrap; align-items: center;
+    margin-bottom: 20px;
+  }
+  .filter-label { font-size: 12px; color: var(--text3); font-weight: 500; margin-right: 4px; }
+  .filter-pill {
+    padding: 5px 14px; border-radius: 20px; font-size: 12px; font-weight: 500;
+    cursor: pointer; border: 1px solid var(--border); background: var(--surface);
+    color: var(--text2); transition: all 0.15s; white-space: nowrap;
+  }
+  .filter-pill:hover { border-color: var(--green-light); color: var(--green); }
+  .filter-pill.active { background: var(--green); color: white; border-color: var(--green); }
+  .filter-pill.new-only { border-color: var(--new-border); color: #059669; background: var(--new-bg); }
+  .filter-pill.new-only.active { background: #059669; color: white; border-color: #059669; }
+
+  /* ── SECTION HEADER ── */
+  .section-header {
+    display: flex; align-items: center; gap: 10px;
+    margin: 24px 0 12px; padding-bottom: 8px;
+    border-bottom: 2px solid var(--border);
+  }
+  .section-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .section-title { font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; }
+  .section-count { font-size: 12px; color: var(--text3); background: var(--surface2); padding: 2px 8px; border-radius: 10px; }
+  .section-new { font-size: 12px; color: #059669; background: var(--new-bg); border: 1px solid var(--new-border); padding: 2px 8px; border-radius: 10px; font-weight: 600; }
+
+  /* ── SCHOOL CARD ── */
+  .school-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 10px; margin-bottom: 8px;
+    transition: box-shadow 0.15s;
+    overflow: hidden;
+  }
+  .school-card:hover { box-shadow: var(--shadow); }
+  .school-card.has-new { border-color: var(--new-border); }
+
+  .school-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 16px; cursor: default;
+  }
+  .school-row.clickable { cursor: pointer; }
+  .school-row.clickable:hover { background: var(--bg); }
+
+  .school-name {
+    flex: 1; font-size: 14px; font-weight: 500;
+    min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .school-meta { font-size: 11px; color: var(--text3); white-space: nowrap; }
+  .school-badges { display: flex; gap: 6px; flex-shrink: 0; align-items: center; }
+  .badge { font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .badge-new { background: var(--new-bg); color: #059669; border: 1px solid var(--new-border); }
+  .badge-count { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .badge-checking { background: var(--amber-bg); color: var(--amber); }
+  .badge-error { background: var(--red-bg); color: var(--red); font-size: 10px; max-width: 200px; overflow: hidden; text-overflow: ellipsis; }
+
+  .school-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+  /* ── JOB LISTINGS ── */
+  .job-list { border-top: 1px solid var(--border); padding: 12px 16px; display: none; }
+  .job-list.open { display: block; }
+
+  .job-item {
+    padding: 12px 14px; border-radius: 8px; margin-bottom: 8px;
+    border: 1px solid var(--border); background: var(--bg);
+    transition: border-color 0.15s;
+  }
+  .job-item:last-child { margin-bottom: 0; }
+  .job-item.is-new { border-color: var(--new-border); background: var(--new-bg); }
+  .job-item:hover { border-color: var(--green-light); }
+
+  .job-header { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 6px; }
+  .job-tag {
+    font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 8px;
+    flex-shrink: 0; margin-top: 2px; white-space: nowrap;
+  }
+  .job-title { font-family: 'Fraunces', serif; font-size: 14px; font-weight: 500; line-height: 1.4; }
+  .new-badge {
+    font-size: 9px; font-weight: 800; padding: 2px 6px; border-radius: 8px;
+    background: #059669; color: white; flex-shrink: 0; margin-top: 3px; letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .job-meta { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+  .job-meta span { font-size: 12px; color: var(--text2); }
+  .job-meta .deadline { color: var(--amber); font-weight: 500; }
+
+  .job-link {
+    font-size: 12px; color: var(--green); text-decoration: none;
+    border-bottom: 1px solid var(--green-border); padding-bottom: 1px;
+  }
+  .job-link:hover { color: #245a42; border-color: var(--green); }
+
+  /* ── TOAST ── */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    padding: 12px 18px; border-radius: 10px; font-size: 13px; max-width: 340px;
+    box-shadow: var(--shadow-lg); animation: slideIn 0.2s ease; line-height: 1.5;
+  }
+  .toast.success { background: white; border-left: 3px solid var(--green-light); color: var(--text); }
+  .toast.error { background: white; border-left: 3px solid var(--red); color: var(--text); }
+  @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* ── MODAL ── */
+  .modal-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.35);
+    z-index: 200; display: none; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 14px; padding: 28px;
+    width: 100%; max-width: 480px; box-shadow: var(--shadow-lg);
+  }
+  .modal-title { font-family: 'Fraunces', serif; font-size: 18px; font-weight: 600; margin-bottom: 16px; }
+  .form-group { margin-bottom: 14px; }
+  .form-label { display: block; font-size: 12px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 5px; }
+  .form-input {
+    width: 100%; padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text);
+    background: var(--bg); outline: none; transition: border-color 0.15s;
+  }
+  .form-input:focus { border-color: var(--green-light); box-shadow: 0 0 0 3px rgba(82,183,136,0.12); }
+  .form-select {
+    width: 100%; padding: 9px 14px; border: 1px solid var(--border); border-radius: 8px;
+    font-size: 14px; font-family: 'DM Sans', sans-serif; color: var(--text);
+    background: var(--bg); outline: none;
+  }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 20px; }
+
+  /* ── EMPTY STATE ── */
+  .empty { text-align: center; padding: 48px 24px; color: var(--text3); }
+  .empty-icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-title { font-family: 'Fraunces', serif; font-size: 18px; color: var(--text2); margin-bottom: 6px; }
+  .empty-text { font-size: 13px; }
+
+  /* ── PROGRESS ── */
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-bottom: 20px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--green-light); border-radius: 2px; transition: width 0.3s ease; width: 0%; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    .header { padding: 0 16px; }
+    .main { padding: 20px 16px; }
+    .logo-text { font-size: 15px; }
+    .header-actions .btn-secondary { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-icon">🧬</div>
+      <div>
+        <div class="logo-text">Biology Faculty Jobs</div>
+        <div class="logo-sub" id="header-sub">Enter your API key to get started</div>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" onclick="openSettings()">⚙️ Settings</button>
+      <button class="btn btn-secondary" onclick="openAddModal()">+ Add School</button>
+      <button class="btn btn-primary" id="check-all-btn" onclick="checkAllVisible()">🔄 Check All</button>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- SETUP BANNER -->
+  <div class="setup-banner" id="setup-banner">
+    <div class="setup-icon">🔑</div>
+    <div style="flex:1">
+      <div class="setup-title">Welcome! Enter your Anthropic API Key to start searching</div>
+      <div class="setup-text">This app uses Claude AI to search for biology faculty job postings at 70+ universities. Get a free API key at <a href="https://console.anthropic.com" target="_blank" style="color:var(--green)">console.anthropic.com</a>. Your key is saved in this browser only.</div>
+      <div class="setup-row">
+        <input type="password" class="setup-input" id="setup-key-input" placeholder="sk-ant-api03-..." />
+        <button class="btn btn-primary" onclick="saveApiKey()">Save Key & Start</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROGRESS BAR -->
+  <div class="progress-bar" id="progress-bar" style="display:none">
+    <div class="progress-fill" id="progress-fill"></div>
+  </div>
+
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat">
+      <div class="stat-val" id="stat-schools">0</div>
+      <div class="stat-label">Schools Tracked</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val" id="stat-checked">0</div>
+      <div class="stat-label">Checked</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val" id="stat-jobs">0</div>
+      <div class="stat-label">Jobs Found</div>
+    </div>
+    <div class="stat-divider"></div>
+    <div class="stat">
+      <div class="stat-val green" id="stat-new">0</div>
+      <div class="stat-label">New This Check</div>
+    </div>
+  </div>
+
+  <!-- FILTER BAR -->
+  <div class="filter-bar">
+    <span class="filter-label">State:</span>
+    <button class="filter-pill active" data-filter="state" data-val="All" onclick="setFilter('state','All',this)">All</button>
+    <button class="filter-pill" data-filter="state" data-val="California" onclick="setFilter('state','California',this)">California</button>
+    <button class="filter-pill" data-filter="state" data-val="Oregon" onclick="setFilter('state','Oregon',this)">Oregon</button>
+    <button class="filter-pill" data-filter="state" data-val="Washington" onclick="setFilter('state','Washington',this)">Washington</button>
+    <button class="filter-pill" data-filter="state" data-val="Colorado" onclick="setFilter('state','Colorado',this)">Colorado</button>
+    <button class="filter-pill" data-filter="state" data-val="Utah" onclick="setFilter('state','Utah',this)">Utah</button>
+    <button class="filter-pill" data-filter="state" data-val="Arizona" onclick="setFilter('state','Arizona',this)">Arizona</button>
+    <button class="filter-pill" data-filter="state" data-val="New Mexico" onclick="setFilter('state','New Mexico',this)">New Mexico</button>
+    <button class="filter-pill" data-filter="state" data-val="Montana" onclick="setFilter('state','Montana',this)">Montana</button>
+    <button class="filter-pill" data-filter="state" data-val="Wyoming" onclick="setFilter('state','Wyoming',this)">Wyoming</button>
+    <button class="filter-pill" data-filter="state" data-val="Job Boards" onclick="setFilter('state','Job Boards',this)">Job Boards</button>
+  </div>
+  <div class="filter-bar" style="margin-top:-12px">
+    <span class="filter-label">Show:</span>
+    <button class="filter-pill new-only" id="new-only-btn" onclick="toggleNewOnly(this)">⭐ New Postings Only</button>
+    <button class="filter-pill" id="with-jobs-btn" onclick="toggleWithJobs(this)">📋 With Jobs Only</button>
+  </div>
+
+  <!-- SCHOOL LIST -->
+  <div id="schools-container"></div>
+
+</main>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toast-container"></div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settings-modal">
+  <div class="modal">
+    <div class="modal-title">⚙️ Settings</div>
+    <div class="form-group">
+      <label class="form-label">Anthropic API Key</label>
+      <input type="password" class="form-input" id="settings-key-input" placeholder="sk-ant-api03-..." />
+      <div style="font-size:11px;color:var(--text3);margin-top:5px">Used for AI-powered job searching. Get one at <a href="https://console.anthropic.com" target="_blank" style="color:var(--green)">console.anthropic.com</a></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettingsKey()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADD SCHOOL MODAL -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-title">+ Add School</div>
+    <div class="form-group">
+      <label class="form-label">School Name</label>
+      <input type="text" class="form-input" id="add-name" placeholder="e.g. University of Colorado Boulder" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">Jobs Page URL</label>
+      <input type="url" class="form-input" id="add-url" placeholder="https://university.edu/careers" />
+    </div>
+    <div class="form-group">
+      <label class="form-label">State</label>
+      <select class="form-select" id="add-state">
+        <option>California</option><option>Oregon</option><option>Washington</option>
+        <option>Colorado</option><option>Utah</option><option>Arizona</option>
+        <option>New Mexico</option><option>Montana</option><option>Wyoming</option>
+        <option>Job Boards</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeAddModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="addSchool()">Add School</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════════════
+const STATE_COLORS = {
+  "Colorado":"#F97316","New Mexico":"#EF4444","Utah":"#A78BFA",
+  "Oregon":"#34D399","Washington":"#60A5FA","Arizona":"#F59E0B",
+  "California":"#EC4899","Montana":"#84CC16","Wyoming":"#14B8A6","Job Boards":"#94A3B8"
+};
+
+const DEFAULT_SITES = [
+  {id:"higheredjobs_bio",name:"HigherEdJobs – Biology",url:"https://www.higheredjobs.com/faculty/search.cfm?JobCat=39",state:"Job Boards"},
+  {id:"chronicle_bio",name:"Chronicle of Higher Ed – Biological Sciences",url:"https://jobs.chronicle.com/jobs/biological-sciences/",state:"Job Boards"},
+  {id:"colorado_college",name:"Colorado College",url:"https://coloradocollege.wd1.myworkdayjobs.com/CC_ExternalApplicants",state:"Colorado"},
+  {id:"csu_pueblo",name:"CSU Pueblo",url:"https://csupueblo.wd5.myworkdayjobs.com/CSUP_External",state:"Colorado"},
+  {id:"fort_lewis",name:"Fort Lewis College",url:"https://www.fortlewis.edu/life-at-flc/careers",state:"Colorado"},
+  {id:"colorado_mesa",name:"Colorado Mesa University",url:"https://coloradomesa.wd1.myworkdayjobs.com/CMU",state:"Colorado"},
+  {id:"western_colorado",name:"Western Colorado University",url:"https://western.edu/about/offices/human-resources/employment/",state:"Colorado"},
+  {id:"adams_state",name:"Adams State University",url:"https://www.adams.edu/administration/human-resources/employment-opportunities/",state:"Colorado"},
+  {id:"metro_state_denver",name:"Metropolitan State University of Denver",url:"https://msudenver.wd1.myworkdayjobs.com/MSUDenver",state:"Colorado"},
+  {id:"regis_univ",name:"Regis University",url:"https://regis.wd1.myworkdayjobs.com/External",state:"Colorado"},
+  {id:"nm_highlands",name:"New Mexico Highlands University",url:"https://www.nmhu.edu/administration/human-resources/employment-opportunities/",state:"New Mexico"},
+  {id:"western_nm",name:"Western New Mexico University",url:"https://wnmu.edu/humanresources/jobs/",state:"New Mexico"},
+  {id:"enmu",name:"Eastern New Mexico University",url:"https://enmu.wd1.myworkdayjobs.com/ENMU_External",state:"New Mexico"},
+  {id:"nmt",name:"NM Institute of Mining & Technology",url:"https://www.nmt.edu/hr/employment.php",state:"New Mexico"},
+  {id:"stjohns_nm",name:"St. John's College (Santa Fe)",url:"https://www.sjc.edu/employment",state:"New Mexico"},
+  {id:"weber_state",name:"Weber State University",url:"https://jobs.weber.edu/postings/search",state:"Utah"},
+  {id:"southern_utah",name:"Southern Utah University",url:"https://suu.wd1.myworkdayjobs.com/SUU_External",state:"Utah"},
+  {id:"utah_tech",name:"Utah Tech University",url:"https://utahtech.wd1.myworkdayjobs.com/UtahTech",state:"Utah"},
+  {id:"utah_valley",name:"Utah Valley University",url:"https://uvu.wd1.myworkdayjobs.com/UVU_External",state:"Utah"},
+  {id:"westminster_ut",name:"Westminster University (UT)",url:"https://westminsteru.wd1.myworkdayjobs.com/WU_External",state:"Utah"},
+  {id:"snow_college",name:"Snow College",url:"https://www.snow.edu/offices/hr/employment/index.html",state:"Utah"},
+  {id:"linfield",name:"Linfield University",url:"https://linfield.wd5.myworkdayjobs.com/Linfield_Careers",state:"Oregon"},
+  {id:"willamette",name:"Willamette University",url:"https://willamette.wd5.myworkdayjobs.com/Willamette",state:"Oregon"},
+  {id:"pacific_univ",name:"Pacific University (OR)",url:"https://pacific.wd5.myworkdayjobs.com/PacificUniversity",state:"Oregon"},
+  {id:"george_fox",name:"George Fox University",url:"https://georgefox.wd1.myworkdayjobs.com/GeorgeFox",state:"Oregon"},
+  {id:"lewis_clark",name:"Lewis & Clark College",url:"https://lewisandclark.wd1.myworkdayjobs.com/LC_Careers",state:"Oregon"},
+  {id:"reed_college",name:"Reed College",url:"https://reed.wd5.myworkdayjobs.com/Reed_College_External_Career_Site",state:"Oregon"},
+  {id:"eastern_oregon",name:"Eastern Oregon University",url:"https://eou.wd5.myworkdayjobs.com/EOU",state:"Oregon"},
+  {id:"southern_oregon",name:"Southern Oregon University",url:"https://sou.wd5.myworkdayjobs.com/SOU_External",state:"Oregon"},
+  {id:"western_oregon",name:"Western Oregon University",url:"https://wou.wd5.myworkdayjobs.com/WOU",state:"Oregon"},
+  {id:"oit",name:"Oregon Institute of Technology",url:"https://oit.wd5.myworkdayjobs.com/OIT",state:"Oregon"},
+  {id:"whitman",name:"Whitman College",url:"https://whitman.wd5.myworkdayjobs.com/Whitman_College",state:"Washington"},
+  {id:"whitworth",name:"Whitworth University",url:"https://whitworth.wd5.myworkdayjobs.com/Whitworth",state:"Washington"},
+  {id:"pacific_lutheran",name:"Pacific Lutheran University",url:"https://plu.wd5.myworkdayjobs.com/PLU",state:"Washington"},
+  {id:"seattle_pacific",name:"Seattle Pacific University",url:"https://spu.wd5.myworkdayjobs.com/SPU_External",state:"Washington"},
+  {id:"evergreen_state",name:"The Evergreen State College",url:"https://evergreen.wd5.myworkdayjobs.com/Evergreen",state:"Washington"},
+  {id:"central_washington",name:"Central Washington University",url:"https://cwu.wd5.myworkdayjobs.com/CWU",state:"Washington"},
+  {id:"eastern_washington",name:"Eastern Washington University",url:"https://ewu.wd5.myworkdayjobs.com/EWU",state:"Washington"},
+  {id:"western_washington",name:"Western Washington University",url:"https://wwu.wd5.myworkdayjobs.com/WWU",state:"Washington"},
+  {id:"saint_martins",name:"Saint Martin's University",url:"https://stmartin.wd5.myworkdayjobs.com/SMU",state:"Washington"},
+  {id:"wsu_main",name:"Washington State University",url:"https://wsu.wd5.myworkdayjobs.com/WSU_Jobs",state:"Washington"},
+  {id:"prescott",name:"Prescott College",url:"https://www.prescott.edu/about/employment",state:"Arizona"},
+  {id:"nau",name:"Northern Arizona University",url:"https://nau.wd1.myworkdayjobs.com/en-US/NAU_Careers",state:"Arizona"},
+  {id:"grand_canyon",name:"Grand Canyon University",url:"https://gcu.wd1.myworkdayjobs.com/GCU_Careers",state:"Arizona"},
+  {id:"calpoly_slo",name:"Cal Poly SLO",url:"https://calpolyslo.wd5.myworkdayjobs.com/CPJOBS",state:"California"},
+  {id:"calpoly_pomona",name:"Cal Poly Pomona",url:"https://cpp.wd5.myworkdayjobs.com/CPP_External",state:"California"},
+  {id:"csun",name:"CSU Northridge (CSUN)",url:"https://csun.wd5.myworkdayjobs.com/CSUN_External",state:"California"},
+  {id:"csulb",name:"CSU Long Beach",url:"https://csulb.wd5.myworkdayjobs.com/CSULB_External",state:"California"},
+  {id:"csu_chico",name:"CSU Chico",url:"https://csuchico.wd5.myworkdayjobs.com/Chico_Careers",state:"California"},
+  {id:"csu_fresno",name:"CSU Fresno",url:"https://fresnostate.wd5.myworkdayjobs.com/fresnostate",state:"California"},
+  {id:"csu_fullerton",name:"CSU Fullerton",url:"https://csuf.wd5.myworkdayjobs.com/CSUF_External",state:"California"},
+  {id:"csu_sacramento",name:"CSU Sacramento",url:"https://csus.wd5.myworkdayjobs.com/CSUS_External",state:"California"},
+  {id:"csu_sanmarcos",name:"CSU San Marcos",url:"https://csusm.wd5.myworkdayjobs.com/CSUSM_External",state:"California"},
+  {id:"csu_stanislaus",name:"CSU Stanislaus",url:"https://csustan.wd5.myworkdayjobs.com/csustan",state:"California"},
+  {id:"csu_monterey",name:"CSU Monterey Bay",url:"https://csumb.wd5.myworkdayjobs.com/CSUMB_External",state:"California"},
+  {id:"cal_humboldt",name:"Cal Poly Humboldt",url:"https://humboldt.wd5.myworkdayjobs.com/Humboldt_Careers",state:"California"},
+  {id:"sonoma_state",name:"Sonoma State University",url:"https://sonoma.wd5.myworkdayjobs.com/SSU_External",state:"California"},
+  {id:"csu_channel_islands",name:"CSU Channel Islands",url:"https://csuci.wd5.myworkdayjobs.com/CSUCI_External",state:"California"},
+  {id:"csu_dominguez",name:"CSU Dominguez Hills",url:"https://csudh.wd5.myworkdayjobs.com/CSUDH_External",state:"California"},
+  {id:"csu_bakersfield",name:"CSU Bakersfield",url:"https://csub.wd5.myworkdayjobs.com/CSUB_External",state:"California"},
+  {id:"csueb",name:"CSU East Bay",url:"https://csueastbay.wd5.myworkdayjobs.com/CSUEB_External",state:"California"},
+  {id:"pomona_college",name:"Pomona College",url:"https://theclaremontcolleges.wd1.myworkdayjobs.com/POM_Careers",state:"California"},
+  {id:"usfca",name:"University of San Francisco",url:"https://usfca.wd5.myworkdayjobs.com/USF_Full-Time_Faculty",state:"California"},
+  {id:"occidental",name:"Occidental College",url:"https://occidental.wd1.myworkdayjobs.com/Oxy_External",state:"California"},
+  {id:"whittier",name:"Whittier College",url:"https://whittier.wd1.myworkdayjobs.com/Whittier_External",state:"California"},
+  {id:"univ_redlands",name:"University of Redlands",url:"https://redlands.wd1.myworkdayjobs.com/Redlands_External",state:"California"},
+  {id:"loyola_marymount",name:"Loyola Marymount University",url:"https://lmu.wd1.myworkdayjobs.com/LMU_External",state:"California"},
+  {id:"saint_marys_ca",name:"Saint Mary's College of California",url:"https://stmarys-ca.wd1.myworkdayjobs.com/StMarys",state:"California"},
+  {id:"dominican_ca",name:"Dominican University of California",url:"https://dominican.wd1.myworkdayjobs.com/Dominican_External",state:"California"},
+  {id:"point_loma",name:"Point Loma Nazarene University",url:"https://pointloma.wd1.myworkdayjobs.com/PLNU_Careers",state:"California"},
+  {id:"pitzer",name:"Pitzer College (Claremont)",url:"https://theclaremontcolleges.wd1.myworkdayjobs.com/PIZ_Careers",state:"California"},
+  {id:"scripps",name:"Scripps College (Claremont)",url:"https://theclaremontcolleges.wd1.myworkdayjobs.com/SCR_Careers",state:"California"},
+  {id:"harvey_mudd",name:"Harvey Mudd College (Claremont)",url:"https://theclaremontcolleges.wd1.myworkdayjobs.com/HMC_Careers",state:"California"},
+  {id:"u_montana",name:"University of Montana",url:"https://www.umt.edu/jobs",state:"Montana"},
+  {id:"montana_state",name:"Montana State University",url:"https://montana.wd5.myworkdayjobs.com/MSU",state:"Montana"},
+  {id:"montana_western",name:"University of Montana Western",url:"https://www.umwestern.edu/about/administration/human-resources/employment-opportunities/",state:"Montana"},
+  {id:"carroll_college",name:"Carroll College (Helena)",url:"https://www.carroll.edu/about/offices/human-resources/employment-opportunities",state:"Montana"},
+  {id:"rocky_mountain_college",name:"Rocky Mountain College (Billings)",url:"https://www.rocky.edu/about/employment",state:"Montana"},
+  {id:"montana_tech",name:"Montana Technological University",url:"https://montanatech.wd5.myworkdayjobs.com/MontanaTech",state:"Montana"},
+  {id:"u_wyoming",name:"University of Wyoming",url:"https://eeik.fa.us2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1",state:"Wyoming"},
+  {id:"sheridan_college",name:"Sheridan College (WY)",url:"https://www.sheridan.edu/about/careers/",state:"Wyoming"},
+  {id:"central_wyoming",name:"Central Wyoming College",url:"https://www.cwc.edu/cwc-employment/",state:"Wyoming"},
+  {id:"laramie_county_cc",name:"Laramie County Community College",url:"https://www.lccc.wy.edu/hr/employment/index.aspx",state:"Wyoming"},
+];
+
+// ═══════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════
+let apiKey = '';
+let sites = [];
+let activeStateFilter = 'All';
+let showNewOnly = false;
+let showWithJobsOnly = false;
+let checkingIds = new Set();
+let expandedIds = new Set();
+
+function loadState() {
+  try {
+    const saved = localStorage.getItem('bioTracker_html_v1');
+    if (saved) {
+      const p = JSON.parse(saved);
+      if (p.apiKey) apiKey = p.apiKey;
+      if (p.siteData) {
+        sites = DEFAULT_SITES.map(s => {
+          const d = p.siteData[s.id] || {};
+          return { ...s, jobs: d.jobs||[], lastChecked: d.lastChecked||null, error: d.error||null };
+        });
+        // Add any user-added custom sites
+        if (p.customSites) {
+          p.customSites.forEach(cs => {
+            if (!sites.find(s => s.id === cs.id)) sites.push(cs);
+          });
+        }
+      } else {
+        sites = DEFAULT_SITES.map(s => ({ ...s, jobs:[], lastChecked:null, error:null }));
+      }
+    } else {
+      sites = DEFAULT_SITES.map(s => ({ ...s, jobs:[], lastChecked:null, error:null }));
+    }
+  } catch {
+    sites = DEFAULT_SITES.map(s => ({ ...s, jobs:[], lastChecked:null, error:null }));
+  }
+}
+
+function saveState() {
+  try {
+    const siteData = {};
+    sites.forEach(s => { siteData[s.id] = { jobs: s.jobs, lastChecked: s.lastChecked, error: s.error }; });
+    const customSites = sites.filter(s => !DEFAULT_SITES.find(d => d.id === s.id));
+    localStorage.setItem('bioTracker_html_v1', JSON.stringify({ apiKey, siteData, customSites }));
+  } catch {}
+}
+
+// ═══════════════════════════════════════════════════════
+// BIO TAG
+// ═══════════════════════════════════════════════════════
+function getBioTag(title) {
+  const t = title.toLowerCase();
+  if (t.includes('marine')||t.includes('aquatic')) return {label:'Marine/Aquatic',color:'#0284C7',bg:'#E0F2FE'};
+  if (t.includes('neuro')) return {label:'Neuroscience',color:'#7C3AED',bg:'#EDE9FE'};
+  if (t.includes('micro')) return {label:'Microbiology',color:'#059669',bg:'#D1FAE5'};
+  if (t.includes('molecul')||t.includes('cell bio')) return {label:'Cell/Molecular',color:'#D97706',bg:'#FEF3C7'};
+  if (t.includes('ecol')||t.includes('evolution')||t.includes('wildlife')||t.includes('conservation')) return {label:'Ecology/Evo',color:'#16A34A',bg:'#DCFCE7'};
+  if (t.includes('genetic')||t.includes('genom')) return {label:'Genetics',color:'#DB2777',bg:'#FCE7F3'};
+  if (t.includes('biochem')) return {label:'Biochemistry',color:'#EA580C',bg:'#FFEDD5'};
+  if (t.includes('physiol')||t.includes('anatomy')) return {label:'Physiology',color:'#0D9488',bg:'#CCFBF1'};
+  if (t.includes('bioinform')||t.includes('computational')) return {label:'Bioinformatics',color:'#4F46E5',bg:'#E0E7FF'};
+  if (t.includes('botan')||t.includes('plant')) return {label:'Botany',color:'#15803D',bg:'#DCFCE7'};
+  if (t.includes('zoo')||t.includes('entomol')) return {label:'Zoology',color:'#6B7280',bg:'#F3F4F6'};
+  if (t.includes('immun')||t.includes('virol')) return {label:'Immunology',color:'#DC2626',bg:'#FEE2E2'};
+  return {label:'Biology',color:'#2D6A4F',bg:'#D8F3DC'};
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════════
+function render() {
+  updateSetupBanner();
+  updateStats();
+  renderSchools();
+  updateHeaderSub();
+}
+
+function updateHeaderSub() {
+  const checked = sites.filter(s=>s.lastChecked).length;
+  const totalJobs = sites.reduce((a,s)=>a+s.jobs.length,0);
+  const totalNew = sites.reduce((a,s)=>a+s.jobs.filter(j=>j.isNew).length,0);
+  let sub = `${sites.length} schools · ${checked} checked · ${totalJobs} jobs`;
+  if (totalNew > 0) sub += ` · ${totalNew} new!`;
+  document.getElementById('header-sub').textContent = apiKey ? sub : 'Enter your API key to get started';
+}
+
+function updateSetupBanner() {
+  document.getElementById('setup-banner').classList.toggle('hidden', !!apiKey);
+}
+
+function updateStats() {
+  document.getElementById('stat-schools').textContent = sites.length;
+  document.getElementById('stat-checked').textContent = sites.filter(s=>s.lastChecked).length;
+  document.getElementById('stat-jobs').textContent = sites.reduce((a,s)=>a+s.jobs.length,0);
+  const newCount = sites.reduce((a,s)=>a+s.jobs.filter(j=>j.isNew).length,0);
+  document.getElementById('stat-new').textContent = newCount;
+}
+
+function getVisibleSites() {
+  return sites.filter(s => {
+    if (activeStateFilter !== 'All' && s.state !== activeStateFilter) return false;
+    if (showNewOnly && !s.jobs.some(j=>j.isNew)) return false;
+    if (showWithJobsOnly && s.jobs.length === 0) return false;
+    return true;
+  });
+}
+
+function renderSchools() {
+  const container = document.getElementById('schools-container');
+  const visible = getVisibleSites();
+
+  if (visible.length === 0) {
+    container.innerHTML = `<div class="empty"><div class="empty-icon">🔬</div><div class="empty-title">No schools match your filters</div><div class="empty-text">Try adjusting the state or show filters above.</div></div>`;
+    return;
+  }
+
+  // Group by state
+  const stateOrder = ['Job Boards','California','Oregon','Washington','Colorado','Utah','Arizona','New Mexico','Montana','Wyoming'];
+  const grouped = {};
+  visible.forEach(s => {
+    if (!grouped[s.state]) grouped[s.state] = [];
+    grouped[s.state].push(s);
+  });
+
+  let html = '';
+  stateOrder.forEach(state => {
+    if (!grouped[state]) return;
+    const stateSites = grouped[state];
+    const color = STATE_COLORS[state] || '#94A3B8';
+    const stateJobs = stateSites.reduce((a,s)=>a+s.jobs.length,0);
+    const stateNew = stateSites.reduce((a,s)=>a+s.jobs.filter(j=>j.isNew).length,0);
+
+    html += `<div class="section-header">
+      <div class="section-dot" style="background:${color}"></div>
+      <span class="section-title">${state}</span>
+      <span class="section-count">${stateSites.length} schools</span>
+      ${stateJobs > 0 ? `<span class="section-count">${stateJobs} jobs</span>` : ''}
+      ${stateNew > 0 ? `<span class="section-new">⭐ ${stateNew} new</span>` : ''}
+    </div>`;
+
+    stateSites.forEach(site => { html += renderSchoolCard(site); });
+  });
+
+  container.innerHTML = html;
+}
+
+function renderSchoolCard(site) {
+  const isExpanded = expandedIds.has(site.id);
+  const isChecking = checkingIds.has(site.id);
+  const newJobs = site.jobs.filter(j=>j.isNew);
+  const hasNew = newJobs.length > 0;
+
+  let badges = '';
+  if (isChecking) badges += `<span class="badge badge-checking">⏳ Searching…</span>`;
+  else if (hasNew) badges += `<span class="badge badge-new">⭐ ${newJobs.length} new</span>`;
+  else if (site.jobs.length > 0) badges += `<span class="badge badge-count">${site.jobs.length} jobs</span>`;
+  if (site.error && !isChecking) badges += `<span class="badge badge-error" title="${site.error}">⚠ Error</span>`;
+
+  const checkedText = site.lastChecked
+    ? `Last checked ${new Date(site.lastChecked).toLocaleDateString('en-US',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'})}`
+    : 'Not yet checked';
+
+  const expandToggle = site.jobs.length > 0
+    ? `<span style="font-size:11px;color:var(--text3);cursor:pointer" onclick="toggleExpand('${site.id}')">${isExpanded ? '▲ hide' : '▼ show jobs'}</span>`
+    : '';
+
+  let jobsHtml = '';
+  if (isExpanded && site.jobs.length > 0) {
+    jobsHtml = `<div class="job-list open">`;
+    site.jobs.forEach(job => {
+      const tag = getBioTag(job.title);
+      jobsHtml += `<div class="job-item ${job.isNew ? 'is-new' : ''}">
+        <div class="job-header">
+          <span class="job-tag" style="background:${tag.bg};color:${tag.color}">${tag.label}</span>
+          <div class="job-title">${escHtml(job.title)}</div>
+          ${job.isNew ? '<span class="new-badge">New</span>' : ''}
+        </div>
+        <div class="job-meta">
+          ${job.department ? `<span>🏛 ${escHtml(job.department)}</span>` : ''}
+          ${job.location ? `<span>📍 ${escHtml(job.location)}</span>` : ''}
+          ${job.type ? `<span>📋 ${escHtml(job.type)}</span>` : ''}
+          ${job.deadline ? `<span class="deadline">⏰ ${escHtml(job.deadline)}</span>` : ''}
+        </div>
+        ${job.url ? `<a href="${escHtml(job.url)}" target="_blank" class="job-link">View posting →</a>` : ''}
+      </div>`;
+    });
+    jobsHtml += `</div>`;
+  }
+
+  return `<div class="school-card ${hasNew ? 'has-new' : ''}" id="card-${site.id}">
+    <div class="school-row">
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          <span class="school-name">${escHtml(site.name)}</span>
+          ${expandToggle}
+        </div>
+        <div class="school-meta">${checkedText}</div>
+      </div>
+      <div class="school-badges">${badges}</div>
+      <div class="school-actions">
+        <button class="btn btn-check ${isChecking ? 'loading' : ''}" onclick="checkSite('${site.id}')" ${isChecking ? 'disabled' : ''}>
+          ${isChecking ? '…' : '🔬 Check'}
+        </button>
+        <button class="btn btn-sm btn-danger" onclick="removeSite('${site.id}')">✕</button>
+      </div>
+    </div>
+    ${jobsHtml}
+  </div>`;
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ═══════════════════════════════════════════════════════
+// INTERACTIONS
+// ═══════════════════════════════════════════════════════
+function toggleExpand(id) {
+  if (expandedIds.has(id)) expandedIds.delete(id);
+  else expandedIds.add(id);
+  renderSchools();
+}
+
+function setFilter(type, val, el) {
+  document.querySelectorAll(`[data-filter="${type}"]`).forEach(b => b.classList.remove('active'));
+  el.classList.add('active');
+  if (type === 'state') activeStateFilter = val;
+  renderSchools();
+}
+
+function toggleNewOnly(el) {
+  showNewOnly = !showNewOnly;
+  el.classList.toggle('active', showNewOnly);
+  if (showNewOnly) showWithJobsOnly = false;
+  document.getElementById('with-jobs-btn').classList.remove('active');
+  renderSchools();
+}
+
+function toggleWithJobs(el) {
+  showWithJobsOnly = !showWithJobsOnly;
+  el.classList.toggle('active', showWithJobsOnly);
+  if (showWithJobsOnly) showNewOnly = false;
+  document.getElementById('new-only-btn').classList.remove('active');
+  renderSchools();
+}
+
+// ═══════════════════════════════════════════════════════
+// API KEY
+// ═══════════════════════════════════════════════════════
+function saveApiKey() {
+  const val = document.getElementById('setup-key-input').value.trim();
+  if (!val) return;
+  apiKey = val;
+  saveState();
+  render();
+  showToast('API key saved! Click "Check" on any school to start searching.', 'success');
+}
+
+function openSettings() {
+  document.getElementById('settings-key-input').value = apiKey;
+  document.getElementById('settings-modal').classList.add('open');
+}
+function closeSettings() { document.getElementById('settings-modal').classList.remove('open'); }
+function saveSettingsKey() {
+  const val = document.getElementById('settings-key-input').value.trim();
+  if (val) { apiKey = val; saveState(); render(); showToast('API key updated!', 'success'); }
+  closeSettings();
+}
+
+// ═══════════════════════════════════════════════════════
+// ADD / REMOVE SCHOOL
+// ═══════════════════════════════════════════════════════
+function openAddModal() { document.getElementById('add-modal').classList.add('open'); }
+function closeAddModal() { document.getElementById('add-modal').classList.remove('open'); }
+function addSchool() {
+  const name = document.getElementById('add-name').value.trim();
+  const url = document.getElementById('add-url').value.trim();
+  const state = document.getElementById('add-state').value;
+  if (!name || !url) { showToast('Please enter both a name and URL.', 'error'); return; }
+  const id = 'custom_' + Date.now();
+  sites.push({ id, name, url, state, jobs:[], lastChecked:null, error:null });
+  saveState(); render();
+  closeAddModal();
+  document.getElementById('add-name').value = '';
+  document.getElementById('add-url').value = '';
+  showToast(`Added ${name}!`, 'success');
+}
+
+function removeSite(id) {
+  if (!confirm('Remove this school from your tracker?')) return;
+  sites = sites.filter(s => s.id !== id);
+  expandedIds.delete(id);
+  saveState(); render();
+}
+
+// ═══════════════════════════════════════════════════════
+// JOB SEARCH
+// ═══════════════════════════════════════════════════════
+async function fetchJobsViaAI(site) {
+  const prompt = `Search the web for current open BIOLOGY and life sciences faculty job postings at ${site.name}.
+
+Their jobs page is: ${site.url}
+
+Please search for:
+1. "${site.name} biology faculty position"
+2. "${site.name} biological sciences professor"
+3. "${site.name} lecturer biology"
+
+Include jobs in: biology, biological sciences, ecology, evolution, microbiology, neuroscience, biochemistry, genetics, physiology, marine biology, cell biology, molecular biology, zoology, botany, bioinformatics, and related life sciences.
+Do NOT include chemistry-only, physics, math, or engineering jobs.
+
+Return ONLY a valid raw JSON array, no markdown, no backticks, no explanation:
+[{"title":"...","department":"...","location":"...","type":"...","deadline":"...","url":"..."}]
+If no biology jobs found, return exactly: []`;
+
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 2000,
+      tools: [{ name: 'web_search', type: 'web_search_20250305' }],
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+
+  const data = await resp.json();
+  if (data.error) throw new Error(data.error.message || 'API error');
+  const text = data.content.filter(b => b.type === 'text').map(b => b.text).join('');
+  const match = text.match(/\[[\s\S]*\]/);
+  if (!match) return [];
+  try { return JSON.parse(match[0]); } catch { return []; }
+}
+
+async function checkSite(siteId) {
+  // Re-read key fresh from storage in case it was just saved
+  try {
+    const saved = localStorage.getItem('bioTracker_html_v1');
+    if (saved) { const p = JSON.parse(saved); if (p.apiKey) apiKey = p.apiKey; }
+  } catch {}
+
+  if (!apiKey) {
+    showToast('Please enter your API key first — scroll up to the green banner.', 'error');
+    document.getElementById('setup-banner').classList.remove('hidden');
+    return;
+  }
+
+  const site = sites.find(s => s.id === siteId);
+  if (!site || checkingIds.has(siteId)) return;
+
+  checkingIds.add(siteId);
+  expandedIds.add(siteId); // auto-expand when results come in
+  renderSchools();
+
+  try {
+    const jobs = await fetchJobsViaAI(site);
+    const prevTitles = new Set((site.jobs||[]).map(j=>j.title));
+    const processed = jobs.map(j => ({ ...j, isNew: !prevTitles.has(j.title) }));
+    site.jobs = processed;
+    site.lastChecked = new Date().toISOString();
+    site.error = null;
+    const nc = processed.filter(j=>j.isNew).length;
+    showToast(`${site.name}: ${processed.length} biology listing${processed.length!==1?'s':''}${nc>0?` · ${nc} new! ⭐`:''}`, 'success');
+  } catch(err) {
+    site.error = err.message;
+    site.lastChecked = new Date().toISOString();
+    showToast(`${site.name}: ${err.message}`, 'error');
+  }
+
+  checkingIds.delete(siteId);
+  saveState();
+  render();
+}
+
+async function checkAllVisible() {
+  if (!apiKey) {
+    showToast('Please enter your API key first.', 'error');
+    document.getElementById('setup-banner').classList.remove('hidden');
+    return;
+  }
+  const visible = getVisibleSites();
+  const total = visible.length;
+  const bar = document.getElementById('progress-bar');
+  const fill = document.getElementById('progress-fill');
+  bar.style.display = 'block';
+  fill.style.width = '0%';
+
+  for (let i = 0; i < visible.length; i++) {
+    fill.style.width = `${Math.round((i / total) * 100)}%`;
+    await checkSite(visible[i].id);
+  }
+  fill.style.width = '100%';
+  setTimeout(() => { bar.style.display = 'none'; fill.style.width = '0%'; }, 1500);
+}
+
+// ═══════════════════════════════════════════════════════
+// TOAST
+// ═══════════════════════════════════════════════════════
+function showToast(msg, type='success') {
+  const container = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.textContent = msg;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 4500);
+}
+
+// ═══════════════════════════════════════════════════════
+// CLOSE MODALS ON OVERLAY CLICK
+// ═══════════════════════════════════════════════════════
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+  overlay.addEventListener('click', e => {
+    if (e.target === overlay) overlay.classList.remove('open');
+  });
+});
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+loadState();
+render();
+</script>
+</body>
+</html>
